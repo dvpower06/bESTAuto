@@ -7,6 +7,7 @@ import java.time.LocalTime;
 import java.util.List;
 import aluguer.BESTAuto;
 import aluguer.Categoria;
+import aluguer.Estacao;
 import app.LeitorFicheiros.Bloco;
 import pds.tempo.HorarioDiario;
 import pds.tempo.HorarioSemanal;
@@ -59,10 +60,12 @@ public class Main {
 				String id = b.getValor("id");
 				String nome = b.getValor("nome");
 				HorarioSemanal h = processarHorario(b);
-				processarCentral(best, b);
+				String central = processarCentral(b); // adicionei central como string
 				processarExtensao(b);
 				processarPagamentoExtensao(b);
 				// TODO armazenar a informação lida no sistema
+				Estacao novaEstacao = new Estacao(id, nome, h, central);
+				 best.estacoes.add(novaEstacao);
 			}
 
 		} catch (IOException e) {
@@ -119,15 +122,15 @@ public class Main {
 	 * 
 	 * @param b o bloco com a informação a processar
 	 */
-	private static void processarCentral(BESTAuto best, Bloco b) {
+	private static String processarCentral( Bloco b) {
 		// TODO completar este método (os return podem ter de ser eliminados)
 		if (b.getValor("central") != null) {
 			String central = b.getValor("central");
-			return;
+			return central;
 		} else {
 			// não tem central
-			return;
-		}
+			return "";
+		} // mudei de void para String e retirei o BESTAuto best
 	}
 
 	/**

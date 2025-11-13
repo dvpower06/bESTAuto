@@ -81,11 +81,25 @@ public class JanelaAluguer extends JFrame {
 		bestAuto = a;
 		setTitle("bEST Auto - A melhor experiência em aluguer de automóveis");
 
-		// TODO colocar a lista de nomes das estações (ordenadas alfabeticamente) no
+		// TODO FEITO colocar a lista de nomes das estações (ordenadas alfabeticamente)
+		// no
 		// vetor nomes (o que está é apenas de exemplo)
+
 		Vector<String> nomes = new Vector<>();
-		nomes.add("Alcains");
-		nomes.add("Castelo Branco");
+		try {
+			java.util.List<LeitorFicheiros.Bloco> blocos = LeitorFicheiros.lerFicheiro("dados/estacoes.txt");
+			for (LeitorFicheiros.Bloco b : blocos) {
+				String nome = b.getValor("nome");
+				if (nome != null)
+					nomes.add(nome);
+			}
+			java.util.Collections.sort(nomes, String.CASE_INSENSITIVE_ORDER);
+		} catch (java.io.IOException e) {
+
+			System.err.println("Não foi possível ler estacoes.txt: " + e.getMessage());
+			nomes.clear();
+
+		}
 		setupJanela(nomes);
 	}
 
