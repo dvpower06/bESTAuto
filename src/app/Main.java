@@ -3,11 +3,14 @@ package app;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.io.IOException;
+import java.security.cert.Extension;
 import java.time.LocalTime;
 import java.util.List;
 import aluguer.BESTAuto;
 import aluguer.Categoria;
 import aluguer.Estacao;
+import aluguer.Extensao;
+import aluguer.PrecoExtensao;
 import app.LeitorFicheiros.Bloco;
 import pds.tempo.HorarioDiario;
 import pds.tempo.HorarioSemanal;
@@ -53,19 +56,19 @@ public class Main {
 	 */
 	private static void readEstacoes(BESTAuto best, String estacoesFile) {
 		try {
-			List<LeitorFicheiros.Bloco> blocos = LeitorFicheiros.lerFicheiro(estacoesFile);
+			List<LeitorFicheiros.Bloco> blocos = LeitorFicheiros.lerFicheiro("dados/estacoes.txt");
 
 			for (LeitorFicheiros.Bloco b : blocos) {
-				// TODO completar este método
+				// TODO FEITO completar este método
 				String id = b.getValor("id");
 				String nome = b.getValor("nome");
 				HorarioSemanal h = processarHorario(b);
 				String central = processarCentral(b); // adicionei central como string
-				processarExtensao(b);
-				processarPagamentoExtensao(b);
-				// TODO armazenar a informação lida no sistema
-				Estacao novaEstacao = new Estacao(id, nome, h, central);
-				 best.estacoes.add(novaEstacao);
+				Extensao extensao = processarExtensao(b);
+				PrecoExtensao precoExtensao = processarPagamentoExtensao(b);
+				// TODO FEITO armazenar a informação lida no sistema
+				Estacao novaEstacao = new Estacao(id, nome, h, central , extensao, precoExtensao);
+				best.estacoes.add(novaEstacao);
 			}
 
 		} catch (IOException e) {
@@ -77,24 +80,45 @@ public class Main {
 
 	/**
 	 * Processa as informações sobre como calcular o extra por haver extensão de
-	 * horário
+	 * horário.
+	 * * @param b O bloco com a informação a processar
 	 * 
-	 * @param b O bloco com a informação a processar
+	 * @return Um objeto PrecoExtensao ou null se não houver extensão.
 	 */
-	private static void processarPagamentoExtensao(Bloco b) {
-		// TODO completar este método (os return podem ter de ser eliminados)
+	private static PrecoExtensao processarPagamentoExtensao(Bloco b) {
 		String tipoPrecario = b.getValor("preco_extensao");
 
-		// se não tem esta chave é porque não tem extensão
 		if (tipoPrecario == null) {
-			return;
-		} else if (tipoPrecario.equals("taxa")) {
-			return;
-		} else if (tipoPrecario.equals("variavel")) {
-			return;
+			return null;
 		}
-		// nunca devia chegar aqui, mas caso alguma coisa corra mal...
-		throw new UnsupportedOperationException("Campo desconhecido: " + tipoPrecario);
+
+		if (tipoPrecario.equals("taxa")) {
+			String[] opcoes = b.getOpcoes("preco_extensao");
+
+			// Deve haver exatamente 1 opção (o valor da taxa)
+			if (opcoes == null || opcoes.length != 1) {
+				throw new IllegalArgumentException("Formato inválido para preco_extensao=taxa[valor]");
+			}
+
+			// O valor é em cêntimos, lido como String nas opções
+			try {
+				long valorTaxa = Long.parseLong(opcoes[0]);
+				return new PrecoExtensao("taxa", valorTaxa);
+			} catch (NumberFormatException e) {
+				throw new IllegalArgumentException("Valor da taxa inválido: " + opcoes[0]);
+			}
+
+		}
+
+		else if (tipoPrecario.equals("variavel")) {
+			// Não há valor fixo associado, o cálculo é feito com base no preço diário da
+			// viatura.
+			// Usei 0L para o valorFixo pois  validado como positivo ou zero.
+			return new PrecoExtensao("variavel", 0L);
+		}
+
+		// Nunca devia chegar aqui se o ficheiro estiver correto.
+		throw new UnsupportedOperationException("Campo desconhecido para preco_extensao: " + tipoPrecario);
 	}
 
 	/**
@@ -102,16 +126,43 @@ public class Main {
 	 * 
 	 * @param b o bloco com a informação a processar
 	 */
-	private static void processarExtensao(Bloco b) {
-		// TODO completar este método (os return podem ter de ser eliminados)
+	private static Extensao processarExtensao(Bloco b) {
+		// TODO FEITO completar este método (os return podem ter de ser eliminados)
 		String tipoExtensao = b.getValor("extensao");
-		// se não tem esta chave é porque não tem extensão
+		// 1. Se não tem a chave, não tem extensão (retorna null)
 		if (tipoExtensao == null) {
-			return;
-		} else if (tipoExtensao.equals("horas")) {
-			return;
-		} else if (tipoExtensao.equals("total")) {
-			return;
+			return null;
+		}
+
+		// 2. Caso: extensao=total
+		else if (tipoExtensao.equals("total")) {
+			// A extensão total significa que qualquer hora fora do horário base será extra.
+			// Usamos 0 para 'maxHoras' para indicar que não há limite de horas extra.
+			return new Extensao("total", 999);
+		}
+
+		// 3. Caso: extensao=horas[N]
+		else if (tipoExtensao.equals("horas")) {
+			String[] opcoes = b.getOpcoes("extensao");
+
+			// O formato requer uma única opção [N]
+			if (opcoes == null || opcoes.length != 1) {
+				throw new IllegalArgumentException(
+						"Formato inválido para extensao=horas[N]. A opção de horas (N) é obrigatória.");
+			}
+
+			try {
+				// A opção é o número de horas (N)
+				int maxHoras = Integer.parseInt(opcoes[0]);
+
+				// É crucial usar uma validação, como a do Validator, para garantir que N é
+				// positivo.
+				// Validator.requirePositive(maxHoras);
+
+				return new Extensao("horas", maxHoras);
+			} catch (NumberFormatException e) {
+				throw new IllegalArgumentException("Valor de horas na extensão inválido: " + opcoes[0]);
+			}
 		}
 		// nunca devia chegar aqui
 		throw new UnsupportedOperationException("Campo desconhecido: " + tipoExtensao);
@@ -123,13 +174,13 @@ public class Main {
 	 * @param b o bloco com a informação a processar
 	 */
 	private static String processarCentral( Bloco b) {
-		// TODO completar este método (os return podem ter de ser eliminados)
+		// TODO FEITO completar este método (os return podem ter de ser eliminados)
 		if (b.getValor("central") != null) {
 			String central = b.getValor("central");
 			return central;
 		} else {
 			// não tem central
-			return "";
+			return null;
 		} // mudei de void para String e retirei o BESTAuto best
 	}
 

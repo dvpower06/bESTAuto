@@ -1,5 +1,7 @@
 package aluguer;
 
+import pds.util.Validator;
+
 import pds.tempo.HorarioSemanal;
 
 public class Estacao {
@@ -7,12 +9,16 @@ public class Estacao {
     String nome;
     HorarioSemanal horario;
     String central;
+    Extensao extensao;
+    PrecoExtensao precoExtensao;
 
-    public Estacao(String id, String nome, HorarioSemanal horario, String central) {
-        this.id = id;
-        this.nome = nome;
+    public Estacao(String id, String nome, HorarioSemanal horario, String central , Extensao extensao, PrecoExtensao precoextensao) {
+        this.id = Validator.requireNonBlank(id) ;
+        this.nome = Validator.requireNonBlank(nome);
         this.horario = horario;
         this.central = central;
+        this.extensao = extensao;
+        this.precoExtensao = precoextensao;        
     }
 
     public String getId() {
@@ -23,27 +29,20 @@ public class Estacao {
         return nome;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
     public HorarioSemanal getHorario() {
         return horario;
-    }
-
-    public void setHorario(HorarioSemanal horario) {
-        this.horario = horario;
     }
 
     public String getCentral() {
         return central;
     }
 
-    public void setCentral(String central) {
-        this.central = central;
+    public Extensao getExtensao() {
+        return extensao;
     }
 
-    
-    
+    public PrecoExtensao getPrecoExtensao() {
+        return precoExtensao;
+    }   
 
 }
