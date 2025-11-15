@@ -3,17 +3,19 @@ package app;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.io.IOException;
-import java.security.cert.Extension;
 import java.time.LocalTime;
 import java.util.List;
 import aluguer.BESTAuto;
 import aluguer.Categoria;
 import aluguer.Estacao;
 import aluguer.Extensao;
+import aluguer.Modelo;
 import aluguer.PrecoExtensao;
+import aluguer.Viatura;
 import app.LeitorFicheiros.Bloco;
 import pds.tempo.HorarioDiario;
 import pds.tempo.HorarioSemanal;
+import pds.util.Validator;
 
 /**
  * Clase que arranca com o sistema
@@ -56,7 +58,7 @@ public class Main {
 	 */
 	private static void readEstacoes(BESTAuto best, String estacoesFile) {
 		try {
-			List<LeitorFicheiros.Bloco> blocos = LeitorFicheiros.lerFicheiro("dados/estacoes.txt");
+			List<LeitorFicheiros.Bloco> blocos = LeitorFicheiros.lerFicheiro(estacoesFile);
 
 			for (LeitorFicheiros.Bloco b : blocos) {
 				// TODO FEITO completar este método
@@ -129,19 +131,14 @@ public class Main {
 	private static Extensao processarExtensao(Bloco b) {
 		// TODO FEITO completar este método (os return podem ter de ser eliminados)
 		String tipoExtensao = b.getValor("extensao");
-		// 1. Se não tem a chave, não tem extensão (retorna null)
+
 		if (tipoExtensao == null) {
 			return null;
 		}
 
-		// 2. Caso: extensao=total
 		else if (tipoExtensao.equals("total")) {
-			// A extensão total significa que qualquer hora fora do horário base será extra.
-			// Usamos 0 para 'maxHoras' para indicar que não há limite de horas extra.
 			return new Extensao("total", 999);
 		}
-
-		// 3. Caso: extensao=horas[N]
 		else if (tipoExtensao.equals("horas")) {
 			String[] opcoes = b.getOpcoes("extensao");
 
@@ -154,10 +151,7 @@ public class Main {
 			try {
 				// A opção é o número de horas (N)
 				int maxHoras = Integer.parseInt(opcoes[0]);
-
-				// É crucial usar uma validação, como a do Validator, para garantir que N é
-				// positivo.
-				// Validator.requirePositive(maxHoras);
+				Validator.requirePositive(maxHoras);
 
 				return new Extensao("horas", maxHoras);
 			} catch (NumberFormatException e) {
@@ -173,13 +167,12 @@ public class Main {
 	 * 
 	 * @param b o bloco com a informação a processar
 	 */
-	private static String processarCentral( Bloco b) {
+	private static String processarCentral(Bloco b) {
 		// TODO FEITO completar este método (os return podem ter de ser eliminados)
 		if (b.getValor("central") != null) {
 			String central = b.getValor("central");
 			return central;
 		} else {
-			// não tem central
 			return null;
 		} // mudei de void para String e retirei o BESTAuto best
 	}
@@ -229,7 +222,9 @@ public class Main {
 				int bagagem = Integer.parseInt(b.getValor("bagagem"));
 				long preco = Integer.parseInt(b.getValor("preco"));
 
-				// TODO completar o método
+				// TODO FEITO completar o método
+				Modelo m = new Modelo(id, modelo, categoria, marca, lotacao, bagagem, preco);
+				best.modelos.add(m);
 
 			}
 		} catch (IOException e) {
@@ -247,13 +242,15 @@ public class Main {
 	 */
 	private static void readViaturas(BESTAuto best, String file) {
 		try {
-			List<LeitorFicheiros.Bloco> blocos = LeitorFicheiros.lerFicheiro(file);
+			List<LeitorFicheiros.Bloco> blocos = LeitorFicheiros.lerFicheiro("dados/carros.txt");
 			for (LeitorFicheiros.Bloco b : blocos) {
 				String matricula = b.getValor("matricula");
 				String modelo = b.getValor("modelo");
 				String estacao = b.getValor("estacao");
 
-				// TODO completar o método
+				// TODO FEITO completar o método
+				Viatura viatura = new Viatura(matricula, modelo, estacao);
+				best.viaturas.add(viatura);
 
 			}
 		} catch (IOException e) {

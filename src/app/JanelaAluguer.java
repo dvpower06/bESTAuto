@@ -11,11 +11,15 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.GridLayout;
+import java.io.IOException;
+import java.lang.reflect.Array;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
@@ -31,6 +35,7 @@ import javax.swing.table.DefaultTableModel;
 
 import aluguer.BESTAuto;
 import aluguer.Categoria;
+import aluguer.Estacao;
 import pds.tempo.HorarioDiario;
 import pds.tempo.HorarioSemanal;
 import pds.tempo.IntervaloTempo;
@@ -74,6 +79,11 @@ public class JanelaAluguer extends JFrame {
 	// A companhia a ser usada
 	private BESTAuto bestAuto;
 
+	private Vector<String> nomesEstacoes = new Vector<>();
+	private Estacao estacaoSelecionada;
+	
+
+
 	/**
 	 * Cria uma janela de aluguer
 	 */
@@ -83,24 +93,22 @@ public class JanelaAluguer extends JFrame {
 
 		// TODO FEITO colocar a lista de nomes das estações (ordenadas alfabeticamente)
 		// no
-		// vetor nomes (o que está é apenas de exemplo)
-
-		Vector<String> nomes = new Vector<>();
+		// vetor nomes (o que está é apenas de exemplo)		
 		try {
 			java.util.List<LeitorFicheiros.Bloco> blocos = LeitorFicheiros.lerFicheiro("dados/estacoes.txt");
 			for (LeitorFicheiros.Bloco b : blocos) {
 				String nome = b.getValor("nome");
 				if (nome != null)
-					nomes.add(nome);
+					nomesEstacoes.add(nome);
 			}
-			java.util.Collections.sort(nomes, String.CASE_INSENSITIVE_ORDER);
+			java.util.Collections.sort(nomesEstacoes, String.CASE_INSENSITIVE_ORDER);
 		} catch (java.io.IOException e) {
 
 			System.err.println("Não foi possível ler estacoes.txt: " + e.getMessage());
-			nomes.clear();
+			nomesEstacoes.clear();
 
 		}
-		setupJanela(nomes);
+		setupJanela(nomesEstacoes);
 	}
 
 	/**
@@ -109,7 +117,11 @@ public class JanelaAluguer extends JFrame {
 	 * @param selecionadaIndex o índice da estação selecionada
 	 */
 	private void escolherEstacao(int selecionadaIndex) {
-		// TODO selecionar a estação adequada
+		// TODO FEITO selecionar a estação adequada
+		String nomeSelecionado = nomesEstacoes.get(selecionadaIndex);
+
+		estacaoSelecionada = bestAuto.estacoes.stream().filter(e -> e.getNome().equals(nomeSelecionado)).findFirst().orElse(null);
+		
 
 		// limpar a pesquisa
 		limparPesquisa();
@@ -233,6 +245,10 @@ public class JanelaAluguer extends JFrame {
 		painel.setBorder(BorderFactory.createTitledBorder("Escolher data de recolha e entrega"));
 		temposPn.add(new JLabel("De:"));
 		dataInicio = LocalDate.now();
+		if (indiceHora == horas.length) {
+			indiceHora = 0;
+			dataInicio = dataInicio.plusDays(1);
+		}
 		deBt = new JButton(dataInicio.format(dataFormatter));
 		deBt.addActionListener(e -> escolherInicio());
 		temposPn.add(deBt);
