@@ -27,6 +27,7 @@ import static javax.swing.SpringLayout.*;
 
 import aluguer.BESTAuto;
 import aluguer.Categoria;
+import aluguer.Estacao;
 
 @SuppressWarnings("serial")
 /**
@@ -40,18 +41,34 @@ public class JanelaEstacoes extends JFrame {
 	DefaultListModel<String> matriculasModel = new DefaultListModel<>();
 	DefaultTableModel indisponibilidadesModel;
 
+	private BESTAuto bestAuto;
+	private Vector<String> nomesEstacoes = new Vector<>();
+	private Estacao estacaoSelecionada;
+	
+
 	/**
 	 * Cria uma janela para apresentar informações sobre uma estação
 	 */
 	public JanelaEstacoes(BESTAuto a) {
 		setTitle("bEST Auto - A melhor experiência em aluguer de automóveis");
 
-		// TODO colocar a lista de nomes das estações (ordenadas alfabeticamente) no
+		// TODO FEITO colocar a lista de nomes das estações (ordenadas alfabeticamente) no
 		// vetor nomes (o que está é apenas de exemplo)
-		Vector<String> nomes = new Vector<>();
-		nomes.add("Alcains");
-		nomes.add("Castelo Branco");
-		setupJanela(nomes);
+		try {
+			java.util.List<LeitorFicheiros.Bloco> blocos = LeitorFicheiros.lerFicheiro("dados/estacoes.txt");
+			for (LeitorFicheiros.Bloco b : blocos) {
+				String nome = b.getValor("nome");
+				if (nome != null)
+					nomesEstacoes.add(nome);
+			}
+			java.util.Collections.sort(nomesEstacoes, String.CASE_INSENSITIVE_ORDER);
+		} catch (java.io.IOException e) {
+
+			System.err.println("Não foi possível ler estacoes.txt: " + e.getMessage());
+			nomesEstacoes.clear();
+
+		}
+		setupJanela(nomesEstacoes);
 	}
 
 	/**

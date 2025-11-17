@@ -1,5 +1,7 @@
 package aluguer;
 
+import pds.util.Validator;
+
 public class Modelo {
 
     private  String id;
@@ -11,13 +13,13 @@ public class Modelo {
     private long preco;
 
     public Modelo(String id, String modelo, Categoria categoria, String marca, int lotacao, int bagagem, long preco) {
-        this.id = id;
-        this.modelo = modelo;
+        this.id = Validator.requireNonBlank(id);
+        this.modelo = Validator.requireNonBlank(modelo);
         this.categoria = categoria;
-        this.marca = marca;
-        this.lotacao = lotacao;
-        this.bagagem = bagagem;
-        this.preco = preco;
+        this.marca = Validator.requireNonBlank(marca);
+        this.lotacao = Validator.requirePositive(lotacao);
+        this.bagagem = Validator.requirePositiveOrZero(bagagem);
+        this.preco = Validator.requirePositive(preco);
     }
 
     public String getId() {

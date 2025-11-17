@@ -71,4 +71,5 @@ public final class HorarioSemanal {
     public boolean estaDentroHorario(DayOfWeek dia, LocalTime hora) {
         return getHorarioDia(dia).contem(LocalTime.from(hora));
     }
+
 }

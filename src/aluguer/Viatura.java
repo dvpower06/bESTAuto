@@ -1,5 +1,7 @@
 package aluguer;
 
+import pds.util.Validator;
+
 public class Viatura {
 
     private String matricula;
@@ -7,9 +9,9 @@ public class Viatura {
     private String estacao;
 
     public Viatura(String matricula, String modelo, String estacao) {
-        this.matricula = matricula;
-        this.modelo = modelo;
-        this.estacao = estacao;
+        this.matricula = Validator.requireNonBlank(matricula);
+        this.modelo = Validator.requireNonBlank(modelo);
+        this.estacao = Validator.requireNonBlank(estacao);
     }
 
     public String getMatricula() {

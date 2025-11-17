@@ -11,15 +11,12 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.GridLayout;
-import java.io.IOException;
-import java.lang.reflect.Array;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Vector;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
@@ -33,13 +30,19 @@ import javax.swing.JScrollPane;
 import javax.swing.SpringLayout;
 import javax.swing.table.DefaultTableModel;
 
+import aluguer.Aluguer;
 import aluguer.BESTAuto;
 import aluguer.Categoria;
 import aluguer.Estacao;
+import aluguer.Extensao;
+import aluguer.Indisponibilidade;
+import aluguer.Modelo;
+import aluguer.Viatura;
 import pds.tempo.HorarioDiario;
 import pds.tempo.HorarioSemanal;
 import pds.tempo.IntervaloTempo;
 import pds.ui.PainelListador;
+import pds.util.GeradorCodigos;
 
 @SuppressWarnings("serial")
 /**
@@ -131,15 +134,16 @@ public class JanelaAluguer extends JFrame {
 	 * método chamado quando o utilizador pressiona o botão de apresentar horário
 	 */
 	private void apresentarHorario() {
-		// TODO ir buscar o horário da estação atual, em vez de usar um vazio
-		HorarioSemanal hs = HorarioSemanal.sempreFechado();
+		// TODO FEITO ir buscar o horário da estação atual, em vez de usar um vazio
 
+		HorarioSemanal hs = estacaoSelecionada.getHorario();
 		apresentarHorario(hs);
 	}
 
 	/**
 	 * Método chamado quando o utilizador pressiona o botão de pesquisar
 	 */
+	
 	private void pesquisar() {
 		limparPesquisa();
 
@@ -154,20 +158,119 @@ public class JanelaAluguer extends JFrame {
 		}
 		intervaloSel = IntervaloTempo.entre(inicio, fim);
 
-		// TODO fazer a pesquisa
+		// TODO FEITO fazer a pesquisa
 
-		// TODO para cada viatura da pesquisa criar um painel e
-		// associar a informação adequada. Cada painel terá um valor (à escolha do
-		// grupo) que o associará a um resultado. Esse valor será depois usado
-		// para identificar qual a viatura alugada se o cliente escolher esse painel
-		PainelAluguer pa1 = new PainelAluguer("Koenigsegg Gemera", 4, 1, 120000, null);
-		alugueres.add(pa1);
-		PainelAluguer pa2 = new PainelAluguer("Koenigsegg Jesko Attack", 2, 1, 100000, null);
-		alugueres.add(pa2);
-
-		// TODO sem resultados (alterar o teste, claro!)? Apresentar essa informação
-		if (Math.abs(2) == -1)
+		if (!estaDentroHorarioTotal(inicio, estacaoSelecionada) || !estaDentroHorarioTotal(fim, estacaoSelecionada)) {
 			alugueres.add(new JLabel("-- SEM RESULTADOS --", JLabel.CENTER));
+			return;
+		}
+
+	
+		ArrayList<String> modelosEncontrados = new ArrayList<>();
+
+		
+		pesquisarViaturasPorEstacao(estacaoSelecionada, modelosEncontrados);
+
+	
+		if (estacaoSelecionada.getCentral() != null) {
+			String nomeCentral = estacaoSelecionada.getCentral();
+			
+			for (Estacao estacao : bestAuto.estacoes) {
+				if (estacao.getNome().equals(nomeCentral)) {
+					pesquisarViaturasPorEstacao(estacao, modelosEncontrados);
+					break;
+				}
+			}
+		}
+
+		// Se não há resultados, mostrar mensagem
+		if (modelosEncontrados.isEmpty()) {
+			alugueres.add(new JLabel("-- SEM RESULTADOS --", JLabel.CENTER));
+		}
+	}
+
+	private void pesquisarViaturasPorEstacao(Estacao estacao, ArrayList<String> modelosEncontrados) {
+		Categoria categoriaSelecionada = (Categoria) categCb.getSelectedItem();
+
+	
+		for (Viatura viatura : bestAuto.viaturas) {
+			if (!viatura.getEstacao().equals(estacao.getId())) {
+				continue; 
+			}
+
+		
+			Modelo modelo = null;
+			for (Modelo m : bestAuto.modelos) {
+				if (m.getId().equals(viatura.getModelo())) {
+					modelo = m;
+					break;
+				}
+			}
+
+			if (modelo == null) {
+				continue; 
+			}
+
+			if (!modelo.getCategoria().equals(categoriaSelecionada)) {
+				continue; 
+			}
+
+			
+			if (modelosEncontrados.contains(modelo.getModelo())) {
+				continue; 
+			}
+
+		
+			modelosEncontrados.add(modelo.getModelo());
+
+	
+			long duracao = intervaloSel.duracao().toDays() + 1; 
+			long precoTotal = modelo.getPreco() * duracao;
+
+		
+			PainelAluguer painel = new PainelAluguer(
+					modelo.getModelo(),
+					modelo.getLotacao(),
+					modelo.getBagagem(),
+					precoTotal,
+					viatura);
+			alugueres.add(painel);
+		}
+	}
+	
+
+	private boolean estaDentroHorarioTotal(LocalDateTime time, Estacao e) {
+
+		if (e.getHorario().estaDentroHorario(time))
+			return true;
+
+		Extensao extensao = e.getExtensao();
+
+		if (extensao == null)
+			return false;
+
+		String tipoExtensao = extensao.getTipoExtensao();
+
+		if ("total".equals(tipoExtensao)) {
+			return true;
+		}
+
+		if ("horas".equals(tipoExtensao)) {
+			HorarioDiario diaHorario = e.getHorario().getHorarioDia(time.getDayOfWeek());
+
+			if (diaHorario.eVazio()) {
+				return false;
+			}
+
+		
+			LocalTime horaTime = LocalTime.from(time);
+			LocalTime horaAberturaComExtensao = diaHorario.getInicio().minusHours(extensao.getMaxHoras());
+			LocalTime horaFechoComExtensao = diaHorario.getFim().plusHours(extensao.getMaxHoras());
+
+			return horaTime.compareTo(horaAberturaComExtensao) >= 0 && horaTime.compareTo(horaFechoComExtensao) <= 0;
+		}
+
+		return false;
 	}
 
 	/**
@@ -176,12 +279,54 @@ public class JanelaAluguer extends JFrame {
 	 * @param valor o objeto selecionado. Este valor foi o usado
 	 *              quando se criou o painel de aluguer
 	 */
+	/*
+	 *	 * 
+	 *  Se a viatura é de outra estação deve ainda:
+	 * o acrescentar uma indisponibilidade com a descrição de que vai ser levada
+	 * para a
+	 * estação final, desde as 17:00 horas do dia anterior até à hora de recolha.
+	 * o acrescentar uma indisponibilidade com a descrição de que vai ser reposta na
+	 * central,
+	 * desde a hora de devolução até às 9:30 do dia seguinte.
+	 * 
+	 */
 	private void alugar(Object valor) {
-		// TODO fazer o aluguer
 
+		// TODO FEITO fazer o aluguer
 		// TODO colocar a info certa nas variáveis
-		String code = "AA1122BB";
-		String matricula = "ZZ-99-ZZ";
+		if (valor == null) {
+			return;
+		}
+
+		Viatura viatura = (Viatura) valor;
+
+		// Obter as informações do modelo para calcular o preço
+		Modelo modelo = null;
+		for (Modelo m : bestAuto.modelos) {
+			if (m.getId().equals(viatura.getModelo())) {
+				modelo = m;
+				break;
+			}
+		}
+
+		if (modelo == null) {
+			return;
+		}
+
+		long duracao = intervaloSel.duracao().toDays() + 1;
+		long precoTotal = modelo.getPreco() * duracao;
+		double preco = precoTotal / 100.0;
+
+		String code = GeradorCodigos.gerarCodigo(8);
+		String matricula = viatura.getMatricula();
+
+		Aluguer aluguer = new Aluguer(viatura, estacaoSelecionada, preco, code, intervaloSel);
+
+	
+		bestAuto.alugueres.add(aluguer);
+		bestAuto.indisponibilidades.add(new Indisponibilidade("Viatura é um aluguer", code));
+	
+		
 
 		// apresentar a info
 		JOptionPane.showMessageDialog(this,
