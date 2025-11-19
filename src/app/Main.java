@@ -142,11 +142,7 @@ public class Main {
 		else if (tipoExtensao.equals("horas")) {
 			String[] opcoes = b.getOpcoes("extensao");
 
-			// O formato requer uma única opção [N]
-			if (opcoes == null || opcoes.length != 1) {
-				throw new IllegalArgumentException(
-						"Formato inválido para extensao=horas[N]. A opção de horas (N) é obrigatória.");
-			}
+			
 
 			try {
 				// A opção é o número de horas (N)
@@ -174,7 +170,7 @@ public class Main {
 			return central;
 		} else {
 			return null;
-		} // mudei de void para String e retirei o BESTAuto best
+		} 
 	}
 
 	/**
