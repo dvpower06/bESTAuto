@@ -4,9 +4,11 @@ import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Vector;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
@@ -28,6 +30,8 @@ import static javax.swing.SpringLayout.*;
 import aluguer.BESTAuto;
 import aluguer.Categoria;
 import aluguer.Estacao;
+import aluguer.Modelo;
+import aluguer.Viatura;
 
 @SuppressWarnings("serial")
 /**
@@ -44,15 +48,16 @@ public class JanelaEstacoes extends JFrame {
 	private BESTAuto bestAuto;
 	private Vector<String> nomesEstacoes = new Vector<>();
 	private Estacao estacaoSelecionada;
-	
+	private Vector<String> nomesCategorias = new Vector<>();
 
 	/**
 	 * Cria uma janela para apresentar informações sobre uma estação
 	 */
 	public JanelaEstacoes(BESTAuto a) {
 		setTitle("bEST Auto - A melhor experiência em aluguer de automóveis");
-
-		// TODO FEITO colocar a lista de nomes das estações (ordenadas alfabeticamente) no
+		this.bestAuto = a;
+		// TODO FEITO colocar a lista de nomes das estações (ordenadas alfabeticamente)
+		// no
 		// vetor nomes (o que está é apenas de exemplo)
 		try {
 			java.util.List<LeitorFicheiros.Bloco> blocos = LeitorFicheiros.lerFicheiro("dados/estacoes.txt");
@@ -77,9 +82,12 @@ public class JanelaEstacoes extends JFrame {
 	 * @param selecionadaIndex o índice da estação selecionada
 	 */
 	private void escolherEstacao(int selecionadaIndex) {
-		// TODO escolher a estação e colocar na lista as categorias suportas por esta
+		// TODO FEITO escolher a estação e colocar na lista as categorias suportas por
+		// esta
 		// estação (neste momento está a colocar todas)
-
+		String nomeSelecionado = nomesEstacoes.get(selecionadaIndex);
+		estacaoSelecionada = bestAuto.estacoes.stream().filter(e -> e.getNome().equals(nomeSelecionado)).findFirst()
+				.orElse(null);
 		Collection<Categoria> lista = List.of(Categoria.values());
 
 		// limpar as restantes listas todas
@@ -101,15 +109,28 @@ public class JanelaEstacoes extends JFrame {
 	private void escolherCategoria(Categoria c) {
 		// TODO colocar na lista o nome dos modelos que a estação selecionada tem nesta
 		// categoria (Neste momento é apenas um exemplo)
-		List<String> modelos = List.of("Koenigsegg Gemera", "Koenigsegg Jesko Attack");
 
 		// limpar as restantes listas
 		modelosModel.clear();
 		matriculasModel.clear();
 		indisponibilidadesModel.setRowCount(0);
 
+		String idEstacao = estacaoSelecionada.getId();
+
+	
+		List<String> modelos = bestAuto.viaturas.stream()
+				.filter(v -> v.getEstacao().getId().equals(idEstacao) && v.getCategoria().equals(c))
+				.map(v -> {
+					for (Modelo m : bestAuto.modelos) {
+						if (m.getId().equals(v.getModelo().getId()))
+							return m.getNome();
+					}
+					return null;
+				})
+				.distinct()
+				.collect(Collectors.toList());
 		// adicionar os novos modelos à lista
-		modelosModel.addAll(modelos);
+		 modelosModel.addAll(modelos);
 	}
 
 	/**
@@ -118,9 +139,15 @@ public class JanelaEstacoes extends JFrame {
 	 * @param modelo nome do modelo selecionado
 	 */
 	private void escolherModelo(String modelo) {
-		// TODO colocar na lista todas as matrículas das viaturas do modelo selecionado,
-		// o que está é apenas um exemplo
-		List<String> matriculas = List.of("ZZ-98-ZZ", "ZZ-99-ZZ");
+		// TODO FEITO colocar na lista todas as matrículas das viaturas do modelo selecionado,
+	
+		List<String> matriculas = new ArrayList<>();
+
+		for (Viatura v : bestAuto.viaturas) {
+			if (v.getModelo().getNome() == modelo) {
+				matriculas.add(v.getMatricula());
+			}
+		}
 
 		// limpar as restantes listas
 		matriculasModel.clear();
@@ -141,6 +168,13 @@ public class JanelaEstacoes extends JFrame {
 		// TODO para cada indiponibilidade da viatura com a matricula selecionada chamar
 		// o método adicionarLinha para adicionar uma linha à tabela de
 		// indisponibilidades (o que está são apenas exemplos)
+
+		// for (Viatura v : bestAuto.viaturas) {
+		// 	if (v.getMatricula() == matricula) {
+				
+		// 	}
+
+
 		adicionarLinha(LocalDateTime.now().plusDays(1).withHour(17).withMinute(0), LocalDateTime.now().plusDays(2),
 				"Deslocar para ALC");
 		adicionarLinha(LocalDateTime.now().plusDays(2), LocalDateTime.now().plusDays(4), "Aluguer XX1234XX");

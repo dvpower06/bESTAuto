@@ -1,20 +1,29 @@
 package aluguer;
 
+import java.time.LocalDateTime;
+
 public class Indisponibilidade {
 
     private String descricao;
-    private String codigo;
+    private LocalDateTime inicio;
+    private LocalDateTime fim;
 
-    public Indisponibilidade(String descricao, String codigo) {
+    public Indisponibilidade(String descricao, LocalDateTime inicio, LocalDateTime fim) {
         this.descricao = descricao;
-        this.codigo = codigo;
+        this.inicio = inicio;
+        this.fim = fim;
     }
     
     public String getDescricao() {
         return descricao;
     }
-    public String getCodigo() {
-        return codigo;
+    
+    public LocalDateTime getInicio() {
+        return inicio;
+    }
+
+    public LocalDateTime getFTime() {
+        return fim;
     }
     
 }

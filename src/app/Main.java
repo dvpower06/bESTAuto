@@ -238,11 +238,30 @@ public class Main {
 	 */
 	private static void readViaturas(BESTAuto best, String file) {
 		try {
-			List<LeitorFicheiros.Bloco> blocos = LeitorFicheiros.lerFicheiro("dados/carros.txt");
+			List<LeitorFicheiros.Bloco> blocos = LeitorFicheiros.lerFicheiro(file);
 			for (LeitorFicheiros.Bloco b : blocos) {
 				String matricula = b.getValor("matricula");
-				String modelo = b.getValor("modelo");
-				String estacao = b.getValor("estacao");
+				String nomeModelo = b.getValor("modelo");
+				String nomeEstacao = b.getValor("estacao");
+				String idModelo = b.getValor("id");
+				Modelo modelo = new Modelo(idModelo, nomeModelo, null, idModelo, 0, 0, 0);
+				Estacao estacao = new Estacao(idModelo, nomeEstacao, null, idModelo, null, null);
+				
+
+
+				for (Modelo m:best.modelos){
+					if(m.getNome()==nomeModelo){
+						modelo= m;
+					}
+				}
+
+				for(Estacao e:best.estacoes){
+					if(e.getNome()==nomeEstacao){
+						estacao= e;
+					}
+					
+				}
+			
 
 				// TODO FEITO completar o método
 				Viatura viatura = new Viatura(matricula, modelo, estacao);

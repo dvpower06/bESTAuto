@@ -194,14 +194,13 @@ public class JanelaAluguer extends JFrame {
 
 	
 		for (Viatura viatura : bestAuto.viaturas) {
-			if (!viatura.getEstacao().equals(estacao.getId())) {
+			if (!viatura.getEstacao().getId().equals(estacao.getId())) {
 				continue; 
 			}
-
 		
 			Modelo modelo = null;
 			for (Modelo m : bestAuto.modelos) {
-				if (m.getId().equals(viatura.getModelo())) {
+				if (m.getId().equals(viatura.getModelo().getId())) {
 					modelo = m;
 					break;
 				}
@@ -216,12 +215,12 @@ public class JanelaAluguer extends JFrame {
 			}
 
 			
-			if (modelosEncontrados.contains(modelo.getModelo())) {
+			if (modelosEncontrados.contains(modelo.getNome())) {
 				continue; 
 			}
 
 		
-			modelosEncontrados.add(modelo.getModelo());
+			modelosEncontrados.add(modelo.getNome());
 
 	
 			long duracao = intervaloSel.duracao().toDays() + 1; 
@@ -229,7 +228,7 @@ public class JanelaAluguer extends JFrame {
 
 		
 			PainelAluguer painel = new PainelAluguer(
-					modelo.getModelo(),
+					modelo.getNome(),
 					modelo.getLotacao(),
 					modelo.getBagagem(),
 					precoTotal,
@@ -292,7 +291,7 @@ public class JanelaAluguer extends JFrame {
 	 */
 	private void alugar(Object valor) {
 
-		// TODO FEITO fazer o aluguer
+		// TODO fazer o aluguer
 		// TODO colocar a info certa nas variáveis
 		if (valor == null) {
 			return;
@@ -300,7 +299,6 @@ public class JanelaAluguer extends JFrame {
 
 		Viatura viatura = (Viatura) valor;
 
-		// Obter as informações do modelo para calcular o preço
 		Modelo modelo = null;
 		for (Modelo m : bestAuto.modelos) {
 			if (m.getId().equals(viatura.getModelo())) {
@@ -320,11 +318,13 @@ public class JanelaAluguer extends JFrame {
 		String code = GeradorCodigos.gerarCodigo(8);
 		String matricula = viatura.getMatricula();
 
+		//como sei se a viatura está indisponivel ante de criar um novo aluguer?
+
 		Aluguer aluguer = new Aluguer(viatura, estacaoSelecionada, preco, code, intervaloSel);
 
 	
 		bestAuto.alugueres.add(aluguer);
-		bestAuto.indisponibilidades.add(new Indisponibilidade("Viatura é um aluguer", code));
+		bestAuto.indisponibilidades.add(new Indisponibilidade("Viatura é um aluguer" + code, intervaloSel.getInicio(), intervaloSel.getFim()));
 	
 		
 

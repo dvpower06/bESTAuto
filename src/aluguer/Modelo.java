@@ -5,7 +5,7 @@ import pds.util.Validator;
 public class Modelo {
 
     private  String id;
-    private String modelo;
+    private String nome;
     private Categoria categoria;
     private String marca;
     private int lotacao;
@@ -13,20 +13,20 @@ public class Modelo {
     private long preco;
 
     public Modelo(String id, String modelo, Categoria categoria, String marca, int lotacao, int bagagem, long preco) {
-        this.id = Validator.requireNonBlank(id);
-        this.modelo = Validator.requireNonBlank(modelo);
+        this.id = id;
+        this.nome = Validator.requireNonBlank(modelo);
         this.categoria = categoria;
-        this.marca = Validator.requireNonBlank(marca);
-        this.lotacao = Validator.requirePositive(lotacao);
+        this.marca = marca;
+        this.lotacao = Validator.requirePositiveOrZero(lotacao);
         this.bagagem = Validator.requirePositiveOrZero(bagagem);
-        this.preco = Validator.requirePositive(preco);
+        this.preco = Validator.requirePositiveOrZero(preco);
     }
 
     public String getId() {
         return id;
     }
-    public String getModelo() {
-        return modelo;
+    public String getNome() {
+        return nome;
     }
     public Categoria getCategoria() {
         return categoria;
