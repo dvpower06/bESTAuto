@@ -4,9 +4,9 @@ import java.time.LocalDateTime;
 
 public class Indisponibilidade {
 
-    private String descricao;
-    private LocalDateTime inicio;
-    private LocalDateTime fim;
+    private final String descricao;
+    private final LocalDateTime inicio;
+    private final LocalDateTime fim;
 
     public Indisponibilidade(String descricao, LocalDateTime inicio, LocalDateTime fim) {
         this.descricao = descricao;

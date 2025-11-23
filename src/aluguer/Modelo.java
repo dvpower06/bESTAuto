@@ -4,13 +4,13 @@ import pds.util.Validator;
 
 public class Modelo {
 
-    private  String id;
-    private String nome;
-    private Categoria categoria;
-    private String marca;
-    private int lotacao;
-    private int bagagem;
-    private long preco;
+    private final String id;
+    private final String nome;
+    private final Categoria categoria;
+    private final String marca;
+    private final int lotacao;
+    private final int bagagem;
+    private final long preco;
 
     public Modelo(String id, String modelo, Categoria categoria, String marca, int lotacao, int bagagem, long preco) {
         this.id = id;

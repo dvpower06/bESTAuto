@@ -6,12 +6,12 @@ import pds.util.Validator;
 import pds.tempo.HorarioSemanal;
 
 public class Estacao {
-    private String id;
-    private String nome;
-    private HorarioSemanal horario;
-    private String central;
-    private Extensao extensao;
-    private PrecoExtensao precoExtensao;
+    private final String id;
+    private final String nome;
+    private final HorarioSemanal horario;
+    private final String central;
+    private final Extensao extensao;
+    private final PrecoExtensao precoExtensao;
 
 
     public Estacao(String id, String nome, HorarioSemanal horario, String central , Extensao extensao, PrecoExtensao precoextensao) {

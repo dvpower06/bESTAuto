@@ -4,9 +4,9 @@ import pds.util.Validator;
 
 public class Viatura {
 
-    private String matricula;
-    private Modelo modelo;
-    private Estacao estacao;
+    private final String matricula;
+    private final Modelo modelo;
+    private final Estacao estacao;
 
     public Viatura(String matricula, Modelo modelo, Estacao estacao) {
         this.matricula = Validator.requireNonBlank(matricula);

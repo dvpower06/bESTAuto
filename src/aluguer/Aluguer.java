@@ -4,11 +4,11 @@ import pds.tempo.IntervaloTempo;
 
 public class Aluguer {
 
-    private Viatura viatura;
-    private Estacao estacao;
-    private double preco;
-    private String codigo;
-    private IntervaloTempo intervaloTempo;
+    private final Viatura viatura;
+    private final Estacao estacao;
+    private final double preco;
+    private final String codigo;
+    private final IntervaloTempo intervaloTempo;
 
     public Aluguer(Viatura viatura, Estacao estacao, double preco, String codigo, IntervaloTempo intervaloTempo) {
         this.viatura = viatura;
