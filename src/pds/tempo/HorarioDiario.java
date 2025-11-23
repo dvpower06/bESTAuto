@@ -96,6 +96,6 @@ public final class HorarioDiario {
      * @return true se for um horário vazio
      */
     public boolean eVazio() {
-        return inicio == fim;
+        return inicio.equals(fim);
     }
 }

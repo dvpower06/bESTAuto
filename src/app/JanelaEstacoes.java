@@ -182,21 +182,17 @@ public class JanelaEstacoes extends JFrame {
 		// indisponibilidades (o que está são apenas exemplos)
 
 		// Procurar a viatura com a matrícula selecionada
-		Viatura viaturaEncontrada = null;
-		for (Viatura v : bestAuto.viaturas) {
-			if (v.getMatricula().equals(matricula)) {
-				viaturaEncontrada = v;
-				break;
-			}
-		}
 
-		// Se encontrou a viatura, procurar alugueres e suas indisponibilidades
+		Viatura viaturaEncontrada = bestAuto.viaturas.stream().filter(v -> v.getMatricula().equals(matricula))
+				.findFirst().orElse(null);
+		
+
 		if (viaturaEncontrada != null) {
 			for (Aluguer a : bestAuto.alugueres) {
 				if (a.getViatura().getMatricula().equals(matricula)) {
 					for (Indisponibilidade ind : bestAuto.indisponibilidades) {
 						if (ind.getDescricao().contains(a.getCodigo())) {
-							adicionarLinha(ind.getInicio(), ind.getFTime(), ind.getDescricao());
+							adicionarLinha(ind.getInicio(), ind.getFim(), ind.getDescricao());
 						}
 					}
 				}

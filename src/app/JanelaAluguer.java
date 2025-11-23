@@ -102,6 +102,7 @@ public class JanelaAluguer extends JFrame {
 				if (nome != null)
 					nomesEstacoes.add(nome);
 			}
+
 			java.util.Collections.sort(nomesEstacoes, String.CASE_INSENSITIVE_ORDER);
 		} catch (java.io.IOException e) {
 
@@ -193,14 +194,11 @@ public class JanelaAluguer extends JFrame {
 				continue;
 			}
 
-			Modelo modelo = null;
-			for (Modelo m : bestAuto.modelos) {
-				if (m.getId().equals(viatura.getModelo().getId())) {
-					modelo = m;
-					break;
-				}
-			}
-
+			
+			Modelo modelo = bestAuto.modelos.stream().filter(m -> m.getId().equals(viatura.getModelo().getId())).findFirst()
+					.orElse(null);
+			
+			
 			if (modelo == null) {
 				continue;
 			}
@@ -271,8 +269,8 @@ public class JanelaAluguer extends JFrame {
 
 	private void alugar(Object valor) {
 
-		// TODO fazer o aluguer
-		// TODO colocar a info certa nas variáveis
+		// TODO FEITO fazer o aluguer
+		// TODO FEITO colocar a info certa nas variáveis
 		if (valor == null) {
 			return;
 		}
@@ -293,7 +291,7 @@ public class JanelaAluguer extends JFrame {
 		String matricula = viatura.getMatricula();
 
 		for (Indisponibilidade ind : bestAuto.indisponibilidades) {
-			if (ind.getInicio().isBefore(intervaloSel.getFim()) && ind.getFTime().isAfter(intervaloSel.getInicio())) {
+			if (ind.getInicio().isBefore(intervaloSel.getFim()) && ind.getFim().isAfter(intervaloSel.getInicio())) {
 				JOptionPane.showMessageDialog(this, "Esta viatura não está disponível no período selecionado!");
 				return;
 			}

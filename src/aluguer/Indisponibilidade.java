@@ -22,7 +22,7 @@ public class Indisponibilidade {
         return inicio;
     }
 
-    public LocalDateTime getFTime() {
+    public LocalDateTime getFim() {
         return fim;
     }
     

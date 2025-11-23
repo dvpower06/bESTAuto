@@ -240,25 +240,14 @@ public class Main {
 				String matricula = b.getValor("matricula");
 				String idModeloVT = b.getValor("modelo");
 				String idEstacao = b.getValor("estacao");
-				Modelo modelo = null;
-				Estacao estacao = null;
-
-				for (Modelo m : best.modelos) {
-					if (m.getId().equals(idModeloVT)) {
-						modelo = m;
-						break;
-					}
-				}
-
-				for (Estacao e : best.estacoes) {
-					if (e.getId().equals(idEstacao)) {
-						estacao = e;
-						break;
-					}
-
-				}
-
 				// TODO FEITO completar o método
+
+				Modelo modelo = best.modelos.stream().filter(m -> m.getId().equals(idModeloVT)).findFirst()
+						.orElse(null);
+
+				Estacao estacao = best.estacoes.stream().filter(e -> e.getId().equals(idEstacao)).findFirst().orElse(null);
+				
+				
 				if (modelo != null && estacao != null) {
 					Viatura viatura = new Viatura(matricula, modelo, estacao);
 					best.viaturas.add(viatura);
