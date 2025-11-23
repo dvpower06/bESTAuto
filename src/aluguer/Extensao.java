@@ -4,8 +4,8 @@ import pds.util.Validator;
 
 public class Extensao {
 
-    String tipoExtensao;
-    int maxHoras;
+    private String tipoExtensao;
+    private int maxHoras;
 
     public Extensao(String tipoExtensao, int maxHoras) {
         this.tipoExtensao = Validator.requireNonBlank(tipoExtensao);
