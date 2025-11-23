@@ -32,6 +32,8 @@ import aluguer.Categoria;
 import aluguer.Estacao;
 import aluguer.Modelo;
 import aluguer.Viatura;
+import aluguer.Aluguer;
+import aluguer.Indisponibilidade;
 
 @SuppressWarnings("serial")
 /**
@@ -106,31 +108,39 @@ public class JanelaEstacoes extends JFrame {
 	 * 
 	 * @param c a categoria escolhida
 	 */
+
+	/*
+	 * O use case começa quando o cliente pressiona a opção de escolha de uma
+	 * categoria.
+	 *  O sistema limpa as listas de modelos, matrículas e indisponibilidades
+	 *  O sistema preenche a lista de modelos com o nome de cada modelo (único) das
+	 * viaturas
+	 * que a estação possui (não se incluem os modelos suportados com recurso à
+	 * estação
+	 * central, mesmo que haja)
+	 */
 	private void escolherCategoria(Categoria c) {
-		// TODO colocar na lista o nome dos modelos que a estação selecionada tem nesta
-		// categoria (Neste momento é apenas um exemplo)
+		List<String> modelos = new ArrayList<>();
+
+		if (estacaoSelecionada != null && estacaoSelecionada.getId() != null) {
+			for (Viatura v : bestAuto.viaturas) {
+				if (v.getEstacao() != null && v.getEstacao().getId() != null
+						&& v.getEstacao().getId().equals(estacaoSelecionada.getId())) {
+					Modelo modelo = v.getModelo();
+					if (modelo != null && modelo.getCategoria().equals(c) && !modelos.contains(modelo.getNome())) {
+						modelos.add(modelo.getNome());
+					}
+				}
+			}
+		}
 
 		// limpar as restantes listas
 		modelosModel.clear();
 		matriculasModel.clear();
 		indisponibilidadesModel.setRowCount(0);
 
-		String idEstacao = estacaoSelecionada.getId();
-
-	
-		List<String> modelos = bestAuto.viaturas.stream()
-				.filter(v -> v.getEstacao().getId().equals(idEstacao) && v.getCategoria().equals(c))
-				.map(v -> {
-					for (Modelo m : bestAuto.modelos) {
-						if (m.getId().equals(v.getModelo().getId()))
-							return m.getNome();
-					}
-					return null;
-				})
-				.distinct()
-				.collect(Collectors.toList());
 		// adicionar os novos modelos à lista
-		 modelosModel.addAll(modelos);
+		modelosModel.addAll(modelos);
 	}
 
 	/**
@@ -139,12 +149,13 @@ public class JanelaEstacoes extends JFrame {
 	 * @param modelo nome do modelo selecionado
 	 */
 	private void escolherModelo(String modelo) {
-		// TODO FEITO colocar na lista todas as matrículas das viaturas do modelo selecionado,
-	
+		// TODO FEITO colocar na lista todas as matrículas das viaturas do modelo
+		// selecionado,
+
 		List<String> matriculas = new ArrayList<>();
 
 		for (Viatura v : bestAuto.viaturas) {
-			if (v.getModelo().getNome() == modelo) {
+			if (v.getModelo() != null && v.getModelo().getNome().equals(modelo)) {
 				matriculas.add(v.getMatricula());
 			}
 		}
@@ -165,21 +176,32 @@ public class JanelaEstacoes extends JFrame {
 	private void escolherAutomovel(String matricula) {
 		indisponibilidadesModel.setRowCount(0); // limpar a tabela
 
-		// TODO para cada indiponibilidade da viatura com a matricula selecionada chamar
+		// TODO FEITO para cada indiponibilidade da viatura com a matricula selecionada
+		// chamar
 		// o método adicionarLinha para adicionar uma linha à tabela de
 		// indisponibilidades (o que está são apenas exemplos)
 
-		// for (Viatura v : bestAuto.viaturas) {
-		// 	if (v.getMatricula() == matricula) {
-				
-		// 	}
+		// Procurar a viatura com a matrícula selecionada
+		Viatura viaturaEncontrada = null;
+		for (Viatura v : bestAuto.viaturas) {
+			if (v.getMatricula().equals(matricula)) {
+				viaturaEncontrada = v;
+				break;
+			}
+		}
 
-
-		adicionarLinha(LocalDateTime.now().plusDays(1).withHour(17).withMinute(0), LocalDateTime.now().plusDays(2),
-				"Deslocar para ALC");
-		adicionarLinha(LocalDateTime.now().plusDays(2), LocalDateTime.now().plusDays(4), "Aluguer XX1234XX");
-		adicionarLinha(LocalDateTime.now().plusDays(4), LocalDateTime.now().plusDays(5).withHour(9).withMinute(30),
-				"Retornar a CTB");
+		// Se encontrou a viatura, procurar alugueres e suas indisponibilidades
+		if (viaturaEncontrada != null) {
+			for (Aluguer a : bestAuto.alugueres) {
+				if (a.getViatura().getMatricula().equals(matricula)) {
+					for (Indisponibilidade ind : bestAuto.indisponibilidades) {
+						if (ind.getDescricao().contains(a.getCodigo())) {
+							adicionarLinha(ind.getInicio(), ind.getFTime(), ind.getDescricao());
+						}
+					}
+				}
+			}
+		}
 	}
 
 	/**

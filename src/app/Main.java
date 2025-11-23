@@ -69,7 +69,7 @@ public class Main {
 				Extensao extensao = processarExtensao(b);
 				PrecoExtensao precoExtensao = processarPagamentoExtensao(b);
 				// TODO FEITO armazenar a informação lida no sistema
-				Estacao novaEstacao = new Estacao(id, nome, h, central , extensao, precoExtensao);
+				Estacao novaEstacao = new Estacao(id, nome, h, central, extensao, precoExtensao);
 				best.estacoes.add(novaEstacao);
 			}
 
@@ -115,7 +115,7 @@ public class Main {
 		else if (tipoPrecario.equals("variavel")) {
 			// Não há valor fixo associado, o cálculo é feito com base no preço diário da
 			// viatura.
-			// Usei 0L para o valorFixo pois  validado como positivo ou zero.
+			// Usei 0L para o valorFixo pois validado como positivo ou zero.
 			return new PrecoExtensao("variavel", 0L);
 		}
 
@@ -138,11 +138,8 @@ public class Main {
 
 		else if (tipoExtensao.equals("total")) {
 			return new Extensao("total", 999);
-		}
-		else if (tipoExtensao.equals("horas")) {
+		} else if (tipoExtensao.equals("horas")) {
 			String[] opcoes = b.getOpcoes("extensao");
-
-			
 
 			try {
 				// A opção é o número de horas (N)
@@ -170,7 +167,7 @@ public class Main {
 			return central;
 		} else {
 			return null;
-		} 
+		}
 	}
 
 	/**
@@ -241,31 +238,31 @@ public class Main {
 			List<LeitorFicheiros.Bloco> blocos = LeitorFicheiros.lerFicheiro(file);
 			for (LeitorFicheiros.Bloco b : blocos) {
 				String matricula = b.getValor("matricula");
-				String nomeModelo = b.getValor("modelo");
-				String nomeEstacao = b.getValor("estacao");
-				String idModelo = b.getValor("id");
-				Modelo modelo = new Modelo(idModelo, nomeModelo, null, idModelo, 0, 0, 0);
-				Estacao estacao = new Estacao(idModelo, nomeEstacao, null, idModelo, null, null);
-				
+				String idModeloVT = b.getValor("modelo");
+				String idEstacao = b.getValor("estacao");
+				Modelo modelo = null;
+				Estacao estacao = null;
 
-
-				for (Modelo m:best.modelos){
-					if(m.getNome()==nomeModelo){
-						modelo= m;
+				for (Modelo m : best.modelos) {
+					if (m.getId().equals(idModeloVT)) {
+						modelo = m;
+						break;
 					}
 				}
 
-				for(Estacao e:best.estacoes){
-					if(e.getNome()==nomeEstacao){
-						estacao= e;
+				for (Estacao e : best.estacoes) {
+					if (e.getId().equals(idEstacao)) {
+						estacao = e;
+						break;
 					}
-					
+
 				}
-			
 
 				// TODO FEITO completar o método
-				Viatura viatura = new Viatura(matricula, modelo, estacao);
-				best.viaturas.add(viatura);
+				if (modelo != null && estacao != null) {
+					Viatura viatura = new Viatura(matricula, modelo, estacao);
+					best.viaturas.add(viatura);
+				}
 
 			}
 		} catch (IOException e) {

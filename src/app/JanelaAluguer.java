@@ -84,8 +84,6 @@ public class JanelaAluguer extends JFrame {
 
 	private Vector<String> nomesEstacoes = new Vector<>();
 	private Estacao estacaoSelecionada;
-	
-
 
 	/**
 	 * Cria uma janela de aluguer
@@ -96,7 +94,7 @@ public class JanelaAluguer extends JFrame {
 
 		// TODO FEITO colocar a lista de nomes das estações (ordenadas alfabeticamente)
 		// no
-		// vetor nomes (o que está é apenas de exemplo)		
+		// vetor nomes (o que está é apenas de exemplo)
 		try {
 			java.util.List<LeitorFicheiros.Bloco> blocos = LeitorFicheiros.lerFicheiro("dados/estacoes.txt");
 			for (LeitorFicheiros.Bloco b : blocos) {
@@ -123,8 +121,8 @@ public class JanelaAluguer extends JFrame {
 		// TODO FEITO selecionar a estação adequada
 		String nomeSelecionado = nomesEstacoes.get(selecionadaIndex);
 
-		estacaoSelecionada = bestAuto.estacoes.stream().filter(e -> e.getNome().equals(nomeSelecionado)).findFirst().orElse(null);
-		
+		estacaoSelecionada = bestAuto.estacoes.stream().filter(e -> e.getNome().equals(nomeSelecionado)).findFirst()
+				.orElse(null);
 
 		// limpar a pesquisa
 		limparPesquisa();
@@ -143,13 +141,14 @@ public class JanelaAluguer extends JFrame {
 	/**
 	 * Método chamado quando o utilizador pressiona o botão de pesquisar
 	 */
-	
+
 	private void pesquisar() {
 		limparPesquisa();
 
 		// ver as datas de inicio e de fim
 		LocalDateTime inicio = LocalDateTime.of(dataInicio, horasInicio);
 		LocalDateTime fim = LocalDateTime.of(dataFim, horasFim);
+
 		// garantir que fim é, pelo menos, um dia depois do início
 		if (!inicio.isBefore(fim) || !dataInicio.isBefore(dataFim)) {
 			JOptionPane.showMessageDialog(null,
@@ -165,16 +164,13 @@ public class JanelaAluguer extends JFrame {
 			return;
 		}
 
-	
 		ArrayList<String> modelosEncontrados = new ArrayList<>();
 
-		
 		pesquisarViaturasPorEstacao(estacaoSelecionada, modelosEncontrados);
 
-	
 		if (estacaoSelecionada.getCentral() != null) {
 			String nomeCentral = estacaoSelecionada.getCentral();
-			
+
 			for (Estacao estacao : bestAuto.estacoes) {
 				if (estacao.getNome().equals(nomeCentral)) {
 					pesquisarViaturasPorEstacao(estacao, modelosEncontrados);
@@ -192,12 +188,11 @@ public class JanelaAluguer extends JFrame {
 	private void pesquisarViaturasPorEstacao(Estacao estacao, ArrayList<String> modelosEncontrados) {
 		Categoria categoriaSelecionada = (Categoria) categCb.getSelectedItem();
 
-	
 		for (Viatura viatura : bestAuto.viaturas) {
 			if (!viatura.getEstacao().getId().equals(estacao.getId())) {
-				continue; 
+				continue;
 			}
-		
+
 			Modelo modelo = null;
 			for (Modelo m : bestAuto.modelos) {
 				if (m.getId().equals(viatura.getModelo().getId())) {
@@ -207,26 +202,22 @@ public class JanelaAluguer extends JFrame {
 			}
 
 			if (modelo == null) {
-				continue; 
+				continue;
 			}
 
 			if (!modelo.getCategoria().equals(categoriaSelecionada)) {
-				continue; 
+				continue;
 			}
 
-			
 			if (modelosEncontrados.contains(modelo.getNome())) {
-				continue; 
+				continue;
 			}
 
-		
 			modelosEncontrados.add(modelo.getNome());
 
-	
-			long duracao = intervaloSel.duracao().toDays() + 1; 
+			long duracao = intervaloSel.duracao().toDays() + 1;
 			long precoTotal = modelo.getPreco() * duracao;
 
-		
 			PainelAluguer painel = new PainelAluguer(
 					modelo.getNome(),
 					modelo.getLotacao(),
@@ -235,8 +226,8 @@ public class JanelaAluguer extends JFrame {
 					viatura);
 			alugueres.add(painel);
 		}
+
 	}
-	
 
 	private boolean estaDentroHorarioTotal(LocalDateTime time, Estacao e) {
 
@@ -261,7 +252,6 @@ public class JanelaAluguer extends JFrame {
 				return false;
 			}
 
-		
 			LocalTime horaTime = LocalTime.from(time);
 			LocalTime horaAberturaComExtensao = diaHorario.getInicio().minusHours(extensao.getMaxHoras());
 			LocalTime horaFechoComExtensao = diaHorario.getFim().plusHours(extensao.getMaxHoras());
@@ -278,17 +268,7 @@ public class JanelaAluguer extends JFrame {
 	 * @param valor o objeto selecionado. Este valor foi o usado
 	 *              quando se criou o painel de aluguer
 	 */
-	/*
-	 *	 * 
-	 *  Se a viatura é de outra estação deve ainda:
-	 * o acrescentar uma indisponibilidade com a descrição de que vai ser levada
-	 * para a
-	 * estação final, desde as 17:00 horas do dia anterior até à hora de recolha.
-	 * o acrescentar uma indisponibilidade com a descrição de que vai ser reposta na
-	 * central,
-	 * desde a hora de devolução até às 9:30 do dia seguinte.
-	 * 
-	 */
+
 	private void alugar(Object valor) {
 
 		// TODO fazer o aluguer
@@ -299,13 +279,7 @@ public class JanelaAluguer extends JFrame {
 
 		Viatura viatura = (Viatura) valor;
 
-		Modelo modelo = null;
-		for (Modelo m : bestAuto.modelos) {
-			if (m.getId().equals(viatura.getModelo())) {
-				modelo = m;
-				break;
-			}
-		}
+		Modelo modelo = viatura.getModelo();
 
 		if (modelo == null) {
 			return;
@@ -318,15 +292,18 @@ public class JanelaAluguer extends JFrame {
 		String code = GeradorCodigos.gerarCodigo(8);
 		String matricula = viatura.getMatricula();
 
-		//como sei se a viatura está indisponivel ante de criar um novo aluguer?
+		for (Indisponibilidade ind : bestAuto.indisponibilidades) {
+			if (ind.getInicio().isBefore(intervaloSel.getFim()) && ind.getFTime().isAfter(intervaloSel.getInicio())) {
+				JOptionPane.showMessageDialog(this, "Esta viatura não está disponível no período selecionado!");
+				return;
+			}
+		}
 
 		Aluguer aluguer = new Aluguer(viatura, estacaoSelecionada, preco, code, intervaloSel);
 
-	
 		bestAuto.alugueres.add(aluguer);
-		bestAuto.indisponibilidades.add(new Indisponibilidade("Viatura é um aluguer" + code, intervaloSel.getInicio(), intervaloSel.getFim()));
-	
-		
+		bestAuto.indisponibilidades.add(
+				new Indisponibilidade("Viatura é um aluguer" + code, intervaloSel.getInicio(), intervaloSel.getFim()));
 
 		// apresentar a info
 		JOptionPane.showMessageDialog(this,

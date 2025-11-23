@@ -26,17 +26,5 @@ public class Viatura {
         return estacao;
     }
 
-    //TODO metodo não confirmado
-    public Categoria getCategoria() {
-        BESTAuto b = new BESTAuto(); 
-        for (Modelo m : b.modelos) {
-            if (m.getId() == modelo.getId()) {
-                return m.getCategoria();
-            }
-        }
-        return null;
-    }
-
-
 
 }
