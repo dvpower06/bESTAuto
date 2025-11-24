@@ -65,7 +65,7 @@ public class Main {
 				String id = b.getValor("id");
 				String nome = b.getValor("nome");
 				HorarioSemanal h = processarHorario(b);
-				String central = processarCentral(b); // adicionei central como string
+				String central = processarCentral(b); 
 				Extensao extensao = processarExtensao(b);
 				PrecoExtensao precoExtensao = processarPagamentoExtensao(b);
 				// TODO FEITO armazenar a informação lida no sistema
@@ -97,12 +97,12 @@ public class Main {
 		if (tipoPrecario.equals("taxa")) {
 			String[] opcoes = b.getOpcoes("preco_extensao");
 
-			// Deve haver exatamente 1 opção (o valor da taxa)
+			
 			if (opcoes == null || opcoes.length != 1) {
 				throw new IllegalArgumentException("Formato inválido para preco_extensao=taxa[valor]");
 			}
 
-			// O valor é em cêntimos, lido como String nas opções
+		
 			try {
 				long valorTaxa = Long.parseLong(opcoes[0]);
 				return new PrecoExtensao("taxa", valorTaxa);
@@ -113,9 +113,7 @@ public class Main {
 		}
 
 		else if (tipoPrecario.equals("variavel")) {
-			// Não há valor fixo associado, o cálculo é feito com base no preço diário da
-			// viatura.
-			// Usei 0L para o valorFixo pois validado como positivo ou zero.
+			
 			return new PrecoExtensao("variavel", 0L);
 		}
 
@@ -142,7 +140,7 @@ public class Main {
 			String[] opcoes = b.getOpcoes("extensao");
 
 			try {
-				// A opção é o número de horas (N)
+				// A opção e o numero de horas (N)
 				int maxHoras = Integer.parseInt(opcoes[0]);
 				Validator.requirePositive(maxHoras);
 

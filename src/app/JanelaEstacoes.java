@@ -2,14 +2,11 @@ package app;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Vector;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.JComboBox;
@@ -50,7 +47,7 @@ public class JanelaEstacoes extends JFrame {
 	private BESTAuto bestAuto;
 	private Vector<String> nomesEstacoes = new Vector<>();
 	private Estacao estacaoSelecionada;
-	private Vector<String> nomesCategorias = new Vector<>();
+	
 
 	/**
 	 * Cria uma janela para apresentar informações sobre uma estação
@@ -107,17 +104,6 @@ public class JanelaEstacoes extends JFrame {
 	 * Método chamado quando o utilizador escolhe uma nova categoria
 	 * 
 	 * @param c a categoria escolhida
-	 */
-
-	/*
-	 * O use case começa quando o cliente pressiona a opção de escolha de uma
-	 * categoria.
-	 *  O sistema limpa as listas de modelos, matrículas e indisponibilidades
-	 *  O sistema preenche a lista de modelos com o nome de cada modelo (único) das
-	 * viaturas
-	 * que a estação possui (não se incluem os modelos suportados com recurso à
-	 * estação
-	 * central, mesmo que haja)
 	 */
 	private void escolherCategoria(Categoria c) {
 		List<String> modelos = new ArrayList<>();
